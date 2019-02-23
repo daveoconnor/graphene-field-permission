@@ -3,7 +3,6 @@
 A package to add field-level permissions for [graphene-django](https://github.com/graphql-python/graphene-django).
 
 
-
 ## Use
 On schema nodes add a decorator "\@has_field_access" to a resolve for each field that you want checked.
 
@@ -61,12 +60,12 @@ pip install graphene-field-permission
 ## Setup
 
 1. Set up graphene and graphene django following their own instructions.
-1. Create a file that will return permissions allowed for the user as shown below. By default arrays and dicts containing arrays are supported. That capability can be overridden by the user fairly easily by using your own "has_field_access" decorator and any data structure you prefer.
+1. Create a file that will return permissions allowed for the user as shown below. By default lists and dicts containing lists are supported. That capability can be overridden by the user fairly easily by using your own "has_field_access" decorator and any data structure you prefer.
 1. Update settings.py to match the instructions below.
 
 ### Example permissions population
 
-These get called once per graphql call. Recommended to use django ORM's ```select_related``` on queries where necessary in order to minimise the number of queries.
+These get called once per graphql call. Recommended to use Django ORM's ```select_related``` on queries where necessary in order to minimise the number of queries.
 
 Standard:
 
@@ -107,7 +106,6 @@ GRAPHENE = {
     'MIDDLEWARE': [
         'graphene_field_permission.permissions.PermissionsMiddleware'
     ]
-
 }
 ```
 
