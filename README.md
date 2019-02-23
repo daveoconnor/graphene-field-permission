@@ -33,7 +33,7 @@ class GroupNode(DjangoObjectType):
         return self.description
 ```
 
-Example showing checking for one of multiple permissions under a group:
+Example showing checking for one of multiple permissions under a group, for cases where permissions differ by group:
 
 ```python
 from graphene_field_permission.decorators import has_field_access
