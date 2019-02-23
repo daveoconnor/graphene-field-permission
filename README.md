@@ -45,6 +45,40 @@ class GroupNode(DjangoObjectType):
 
 ```
 
+## Result in GraphQL output:
+
+```javascript
+{
+  "errors": [
+    {
+      "message": "No access for user on field 'group_name'",
+      "locations": [
+        {
+          "line": 7,
+          "column": 9
+        }
+      ],
+      "path": [
+        "group",
+        "edges",
+        0,
+        "node",
+        "groupName"
+      ]
+    }
+  ],
+  "data": {
+    "team": {
+      "edges": [
+        {
+          "node": null
+        }
+      ]
+    }
+  }
+}
+```
+
 ### Usage notes:
 
 1. An exception is thrown should a user attempt to access a field for which they don't have access. Graphene-django doesn't allow returning None for fields which aren't set as nullable. That makes it necessary to have your graphql queries fine grained enough to not call those fields in the first place. Client side checking of permissions is recommended in order to limit the field's accessed in the query in the first place.
