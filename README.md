@@ -68,7 +68,7 @@ class GroupNode(DjangoObjectType):
     }
   ],
   "data": {
-    "team": {
+    "group": {
       "edges": [
         {
           "node": null
