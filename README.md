@@ -38,12 +38,19 @@ class GroupNode(DjangoObjectType):
 1. An exception is thrown should a user attempt to access a field for which they don't have access. Graphene-django doesn't allow returning None for fields which aren't set as nullable. That makes it necessary to have your graphql queries to be fine grained enough to not call those fields in the first place. Client side checking of permissions is recommended in order to limit the field's accessed in the query in the first place.
 1. I tried about four different ways to do this so resolve_field wasn't necessary, but found this to be the best balance between making it schema-definable and performant. I'm open to pull requests if someone can think of a better way.
 
+
+## Installation
+
+```
+pip install graphene-field-permission
+```
+
 ## Setup
 
 After setting up graphene following its own instructions.
 
 
-1. Create a file that will return a struct of permissions allowed for the user. By default arrays and dicts containing arrays are supported. However that functionality can be extended by the user fairly easily by using your own "has_field_access" decorator
+1. Create a file that will return permissions allowed for the user as shown below. By default arrays and dicts containing arrays are supported. That capability can be overridden by the user fairly easily by using your own "has_field_access" decorator and any data structure you prefer.
 
 Example:
 
