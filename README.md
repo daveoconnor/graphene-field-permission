@@ -5,7 +5,7 @@ A package to add field-level permissions for [graphene-django](https://github.co
 
 
 ## Use
-On schema nodes add @has_field_access for each 'resolve' that you want checked.
+On schema nodes add a decorator "\@has_field_access" to a resolve for each field that you want checked.
 
 
 Usage Example:
@@ -36,6 +36,7 @@ class GroupNode(DjangoObjectType):
 ### Usage notes:
 
 1. An exception is thrown should a user attempt to access a field for which they don't have access. Graphene-django doesn't allow returning None for fields which aren't set as nullable. That makes it necessary to have your graphql queries to be fine grained enough to not call those fields in the first place. Client side checking of permissions is recommended in order to limit the field's accessed in the query in the first place.
+1. I tried about four different ways to do this so resolve_field wasn't necessary, but found this to be the best balance between making it schema-definable and performant. I'm open to pull requests if someone can think of a better way.
 
 ## Setup
 
@@ -47,14 +48,14 @@ After setting up graphene following its own instructions.
 Example:
 
 app/helpers/user_permissions.py
-```
 
+```
 # standard version
 def get_user_permissions(user):
     # query database to determine the passed in user's permissions
     return ['permission1', 'permission2', 'permission3']
 
-# filter_id version
+# filter_id utilising version
 def get_user_permissions(user):
     # query database to determine the passed in user's permissions
     return {
