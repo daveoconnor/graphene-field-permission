@@ -8,8 +8,8 @@ A package to add field-level permissions for [graphene-django](https://github.co
 On schema nodes add a decorator "\@has_field_access" to a resolve for each field that you want checked.
 
 
-Usage Example:
-```
+Usage example in schema files:
+```python
 from graphene_field_permission.decorators import has_field_access
 
 class GroupNode(DjangoObjectType):
@@ -17,26 +17,39 @@ class GroupNode(DjangoObjectType):
     def resolve_group_name(self, info):
         return self.name
 
-    # example showing checking for one of multiple (unlimited) permissions
-    @has_field_access('permission1', 'permission2')
-    def resolve_group_description(self, info):
-        return self.description
-
-    # example showing checking for one of multiple permissions under a group
-    @has_field_access('permission1', 'permission2', filter_id='group-id-123')
-    def resolve_group_description(self, info):
-        return self.description
-
     class Meta:
         model = Group
         ...
+```
+
+Example showing checking for one of multiple (unlimited) permissions:
+
+```python
+from graphene_field_permission.decorators import has_field_access
+
+class GroupNode(DjangoObjectType):
+    @has_field_access('permission1', 'permission2')
+    def resolve_group_description(self, info):
+        return self.description
+```
+
+Example showing checking for one of multiple permissions under a group:
+
+```python
+from graphene_field_permission.decorators import has_field_access
+
+class GroupNode(DjangoObjectType):
+    @has_field_access('permission1', 'permission2', filter_id='group-id-123')
+    def resolve_group_text(self, info):
+        return self.text
+
 
 ```
 
 ### Usage notes:
 
-1. An exception is thrown should a user attempt to access a field for which they don't have access. Graphene-django doesn't allow returning None for fields which aren't set as nullable. That makes it necessary to have your graphql queries to be fine grained enough to not call those fields in the first place. Client side checking of permissions is recommended in order to limit the field's accessed in the query in the first place.
-1. I tried about four different ways to do this so resolve_field wasn't necessary, but found this to be the best balance between making it schema-definable and performant. I'm open to pull requests if someone can think of a better way.
+1. An exception is thrown should a user attempt to access a field for which they don't have access. Graphene-django doesn't allow returning None for fields which aren't set as nullable. That makes it necessary to have your graphql queries fine grained enough to not call those fields in the first place. Client side checking of permissions is recommended in order to limit the field's accessed in the query in the first place.
+1. I tried about four different ways to do this so resolve_field wasn't necessary, but found this to be the best balance of making it schema-definable and performant. I'm open to pull requests if someone can think of a better way.
 
 
 ## Installation
@@ -47,22 +60,26 @@ pip install graphene-field-permission
 
 ## Setup
 
-After setting up graphene following its own instructions.
-
-
+1. Set up graphene and graphene django following their own instructions.
 1. Create a file that will return permissions allowed for the user as shown below. By default arrays and dicts containing arrays are supported. That capability can be overridden by the user fairly easily by using your own "has_field_access" decorator and any data structure you prefer.
+1. Update settings.py to match the instructions below.
 
-Example:
+### Example permissions population
 
-app/helpers/user_permissions.py
+These get called once per graphql call. Recommended to use django ORM's ```select_related``` on queries where necessary in order to minimise the number of queries.
 
-```
-# standard version
+Standard:
+
+```python
 def get_user_permissions(user):
     # query database to determine the passed in user's permissions
     return ['permission1', 'permission2', 'permission3']
 
-# filter_id utilising version
+```
+
+Or grouped:
+
+```python
 def get_user_permissions(user):
     # query database to determine the passed in user's permissions
     return {
@@ -71,19 +88,26 @@ def get_user_permissions(user):
     }
 ```
 
-Update settings.py to add:
+### Settings
 
-```
-GRAPHENE = {
-    'MIDDLEWARE': [
-        'config.schema.middleware.permissions.PermissionsMiddleware',
-    ]
+With the above method at app/helpers/user_permissions.py (for example) update settings.py to add:
 
-}
-
+```python
 GRAPHENE_FIELD_PERMISSION = {
     'SRC_MODULE': 'app.helpers.user_permissions',
     'SRC_METHOD': 'get_user_permissions',
+}
+```
+
+Also update the main graphene settings to add the middleware.
+
+
+```python
+GRAPHENE = {
+    'MIDDLEWARE': [
+        'graphene_field_permission.permissions.PermissionsMiddleware'
+    ]
+
 }
 ```
 
@@ -91,5 +115,5 @@ GRAPHENE_FIELD_PERMISSION = {
 
 I don't plan to develop this a whole lot further. It has scratched my itch for now. I would like to add the following though:
 
-1. Unit tests, may get added in time
+1. Unit tests, may get added in time.
 1. This currently only supports Graphene under Django. I'm open to others adding support for other graphene-python projects if they want to submit pull requests.
