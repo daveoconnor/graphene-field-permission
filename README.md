@@ -32,17 +32,22 @@ class GroupNode(DjangoObjectType):
         return self.description
 ```
 
-Example showing checking for one of multiple permissions under a group, for cases where permissions differ by group:
+Example showing checking for one of multiple permissions under a group, for cases where permissions differ by group id:
 
 ```python
 from graphene_field_permission.decorators import has_field_access
 
 class GroupNode(DjangoObjectType):
-    @has_field_access('permission1', 'permission2', filter_id='group-id-123')
+    @has_field_access('permission1', 'permission2', filter_field='group_id')
     def resolve_group_text(self, info):
         return self.text
+```
+```group_id``` in the above example will look at the GroupNode group_id field. Add ```.``` separators for related objects. ```filter_fields``` processing will traverse related objects as necessary to reduce the number of queries.
 
+It's recommended to try and reduce these as much as possible. e.g. using group.division.corporation_id instead of group.division.corporation.id
 
+```python
+@has_field_access('permission1', 'permission2', filter_field='group.division.corporation_id')
 ```
 
 ## Result in GraphQL output:
