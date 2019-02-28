@@ -25,10 +25,6 @@ class has_field_access():
                 filter_id
             )
 
-        logger.debug("check {} against req {}".format(
-            relevant_perms,
-            self.req_perms
-        ))
         for perm in self.req_perms:
             logger.debug("check user has {} in {}".format(
                 perm,
