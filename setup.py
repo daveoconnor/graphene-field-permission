@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="graphene-field-permission",
-    version="0.0.2",
+    version="0.0.3",
     author="Dave O'Connor",
     author_email="github@dead-pixels.org",
     description="A package to add field permission support for Graphene",
