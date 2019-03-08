@@ -1,3 +1,7 @@
+*.pyc
+.cache
+.coverage
+__pycache__/
 build/
 dist/
 graphene_field_permission.egg-info/
