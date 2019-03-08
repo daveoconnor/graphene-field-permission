@@ -1,4 +1,8 @@
 import setuptools
+from os import sys
+
+needs_pytest = {'pytest', 'test', 'ptr'}.intersection(sys.argv)
+pytest_runner = ['pytest-runner'] if needs_pytest else []
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -18,4 +22,7 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
+    tests_require=["pytest"],
+    setup_requires=[] + pytest_runner,
+
 )
