@@ -22,6 +22,16 @@ class PermissionsMiddleware():
 
         raise ImportError('No configured settings found.')
 
+    def __restructure_permissions(self, raw_permissions):
+        if isinstance(raw_permissions, list):
+            return {value: True for value in raw_permissions}
+        elif isinstance(raw_permissions, dict):
+            permissions = {}
+            for group in raw_permissions:
+                group_perms = {value: True for value in raw_permissions[group]}
+                permissions[group] = group_perms
+            return permissions
+
     def __fetch_permissions(self, user):
         self.permissions = {}
         try:
@@ -50,8 +60,8 @@ class PermissionsMiddleware():
                 src_mod
             ))
         permissions = func(user)
-        logger.debug("permissions: {}".format(permissions))
-        self.permissions = permissions
+        self.permissions = self.__restructure_permissions(permissions)
+        logger.debug("permissions: {}".format(self.permissions))
 
     def resolve(self, next, root, info, **kwargs):
         # have to check 'id' because AnonymousUser is

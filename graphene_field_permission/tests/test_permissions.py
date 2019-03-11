@@ -117,6 +117,28 @@ class TestPermissionsMiddleware():
 
         # add tests for additional frameworks here
 
+    def test___restructure_permissions(self):
+        import graphene_field_permission.permissions   # noqa
+        importlib.reload(graphene_field_permission.permissions)
+        pm = graphene_field_permission.permissions.PermissionsMiddleware()
+        results = pm._PermissionsMiddleware__restructure_permissions(
+            ['permission1', 'permission2', 'permission3']
+        )
+        assert results['permission1'] is True
+        assert results['permission2'] is True
+        assert results['permission3'] is True
+
+        results = pm._PermissionsMiddleware__restructure_permissions(
+            {
+                'group-567': ['permission5', 'permission6', 'permission7'],
+                'group-789': ['permission7', 'permission8', 'permission9']
+            }
+        )
+        assert results['group-567']['permission5'] is True
+        assert results['group-567']['permission7'] is True
+        assert results['group-789']['permission7'] is True
+        assert results['group-789']['permission9'] is True
+
     def test___fetch_permissions(self, monkeypatch, django_mock, logger, user):
         # instances of things that can be re-used
         fakemod = Mock()
@@ -214,9 +236,9 @@ class TestPermissionsMiddleware():
         pm._PermissionsMiddleware__fetch_permissions(
             user
         )
-        assert 'permission1' in pm.permissions
-        assert 'permission2' in pm.permissions
-        assert 'permission3' in pm.permissions
+        assert pm.permissions['permission1'] is True
+        assert pm.permissions['permission2'] is True
+        assert pm.permissions['permission3'] is True
 
     def test_resolve(self):
         fakemod_resolve = Mock()
