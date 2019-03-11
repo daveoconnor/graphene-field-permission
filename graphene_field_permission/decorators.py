@@ -52,9 +52,16 @@ class has_field_access():
                 perm,
                 relevant_perms,
             ))
-            match = perm.lower() in relevant_perms
+            try:
+                match = relevant_perms[perm.lower()]
+                return match
+            except KeyError:
+                pass
 
-        return match
+        raise KeyError('no match found on {} against {}'.format(
+            self.req_perms,
+            relevant_perms,
+        ))
 
     def __call__(self, func, *args, **kwargs):
         def check(data, info, *args, **kwargs):
@@ -69,7 +76,9 @@ class has_field_access():
             if self.filter_field is not None:
                 filter_id = self._get_filter_data(data, self.filter_field)
 
-            if not self._has_access(permissions, filter_id=filter_id):
+            try:
+                self._has_access(permissions, filter_id=filter_id)
+            except KeyError:
                 field = '_'.join(func.__name__.split('_')[1:])
                 error_msg = "No access for user on field '{}'"
                 raise Exception(error_msg.format(field))

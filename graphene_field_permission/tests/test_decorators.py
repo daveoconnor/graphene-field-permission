@@ -6,16 +6,16 @@ from unittest.mock import Mock, MagicMock
 @pytest.fixture
 def group_permissions():
     return {
-        'group-1234': [
-            'permission1',
-            'permission2',
-            'permission3',
-        ],
-        'group-5678': [
-            'permission4',
-            'permission5',
-            'permission6',
-        ]
+        'group-1234': {
+            'permission1': True,
+            'permission2': True,
+            'permission3': True,
+        },
+        'group-5678': {
+            'permission4': True,
+            'permission5': True,
+            'permission6': True,
+        }
     }
 
 
@@ -49,11 +49,11 @@ def decorator3():
 @pytest.fixture(autouse=True)
 def singleinfo():
     info = MagicMock()
-    info.context.user_permissions = [
-        'permission1',
-        'permission2',
-        'permission3',
-    ]
+    info.context.user_permissions = {
+        'permission1': True,
+        'permission2': True,
+        'permission3': True,
+    }
     return info
 
 
@@ -139,32 +139,39 @@ class TestDecorators():
 
     def test__has_access(self, decorator1, decorator2, decorator3,
                          group_permissions):
-        assert decorator1._has_access(['permission1']) is True
+        assert decorator1._has_access({'permission1': True}) is True
         # test that it's OR
-        assert decorator1._has_access(['permission1', 'permX']) is True
+        assert decorator1._has_access({
+            'permission1': True, 'permX': True
+        }) is True
         # test that order doesn't matter
-        assert decorator1._has_access(['permX', 'permission1']) is True
-        assert decorator1._has_access(['permX']) is False
+        assert decorator1._has_access({
+            'permX': True, 'permission1': True
+        }) is True
+        with pytest.raises(KeyError):
+            decorator1._has_access({'permX': True})
 
         assert decorator2._has_access(
             group_permissions,
             'group-1234'
         ) is True
         # test for false positive
-        assert decorator2._has_access(
-            group_permissions,
-            'group-5678'
-        ) is False
+        with pytest.raises(KeyError):
+            decorator2._has_access(
+                group_permissions,
+                'group-5678'
+            )
 
         assert decorator3._has_access(
             group_permissions,
             'group-5678'
         ) is True
         # test for false positive
-        assert decorator3._has_access(
-            group_permissions,
-            'group-1234'
-        ) is False
+        with pytest.raises(KeyError):
+            decorator3._has_access(
+                group_permissions,
+                'group-1234'
+            )
 
     def test___call__(self, singleinfo, groupinfo):
         # test working group
