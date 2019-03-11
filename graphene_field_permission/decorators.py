@@ -65,6 +65,7 @@ class has_field_access():
             ))
             permissions = info.context.user_permissions
 
+            filter_id = None
             if self.filter_field is not None:
                 filter_id = self._get_filter_data(data, self.filter_field)
 
