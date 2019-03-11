@@ -1,4 +1,3 @@
-from django.conf import settings
 import importlib
 import logging
 logger = logging.getLogger(__name__)
@@ -8,23 +7,42 @@ class PermissionsMiddleware():
     def on_error(self, error):
         logger.error(error)
 
+    def __import_django_settings(self):
+        from django.conf import settings
+        config = settings.GRAPHENE_FIELD_PERMISSION
+        return config['SRC_MODULE'], config['SRC_METHOD']
+
+    def __import_settings(self):
+        try:
+            return self.__import_django_settings()
+        except ImportError as exc:
+            logger.debug("django.conf not imported.")
+
+        # TODO: other frameworks here
+
+        raise ImportError('No configured settings found.')
+
     def __fetch_permissions(self, user):
         self.permissions = {}
-
-        src_mod = settings.GRAPHENE_FIELD_PERMISSION.get('SRC_MODULE', None)
-        src_method = settings.GRAPHENE_FIELD_PERMISSION.get('SRC_METHOD', None)
-        if src_mod is None:
-            error_msg = 'settings.GRAPHENE_FIELD_PERMISSION.SRC_MODULE not set'
-            raise Exception(error_msg)
-        if src_method is None:
-            error_msg = 'settings.GRAPHENE_FIELD_PERMISSION.SRC_METHOD not set'
-            raise Exception(error_msg)
+        try:
+            src_mod, src_method = self.__import_settings()
+            print("src_mod %s, src_method %s" % (src_mod, src_method))
+        except ImportError as exc1:
+            print('caught ImportError')
+            error_msg = 'Failed to import any settings. Check your config.'
+            raise Exception(error_msg) from exc1
+        except AttributeError as exc2:
+            error_msg = 'missing GRAPHENE_FIELD_PERMISSION in django.conf.'
+            raise Exception(error_msg) from exc2
+        except KeyError as exc3:
+            error_msg = 'missing GRAPHENE_FIELD_PERMISSION values.'
+            raise Exception(error_msg) from exc3
 
         try:
             permissions_helper = importlib.import_module(src_mod)
-        except Exception:
+        except Exception as exc:
             error_msg = "UserPermissions module not found at {}"
-            raise Exception(error_msg.format(src_mod))
+            raise Exception(error_msg.format(src_mod)) from exc
 
         func = getattr(permissions_helper, src_method, None)
         logger.debug("permissions function {}".format(func))
