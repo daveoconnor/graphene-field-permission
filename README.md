@@ -152,5 +152,4 @@ GRAPHENE = {
 
 I don't plan to develop this a whole lot further. It has scratched my itch for now. I would like to add the following though:
 
-1. Unit tests, may get added in time.
 1. This currently only supports Graphene under Django. I'm open to others adding support for other graphene-python projects if they want to submit pull requests.
