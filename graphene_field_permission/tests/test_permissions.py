@@ -251,3 +251,43 @@ class TestPermissionsMiddleware():
         assert 'permission11' in pm.permissions
         assert 'permission12' in pm.permissions
         assert 'permission13' in pm.permissions
+
+        fakemod_resolve = Mock()
+        fakemod_resolve.get_user_permissions_resolve = lambda _: {
+            'group-1234': [
+                'permission11',
+                'permission12',
+                'permission13'
+            ],
+            'group-2345': [
+                'permission21',
+                'permission22',
+                'permission23'
+            ],
+        }
+        django_mock = Mock()
+        django_mock.settings.GRAPHENE_FIELD_PERMISSION = {
+            'SRC_MODULE': 'fakemod_resolve',
+            'SRC_METHOD': 'get_user_permissions_resolve'
+        }
+        del sys.modules['django.conf']
+        sys.modules['django.conf'] = django_mock
+        sys.modules['fakemod_resolve'] = fakemod_resolve
+
+        import graphene_field_permission.permissions
+        importlib.reload(graphene_field_permission.permissions)
+        pm = graphene_field_permission.permissions.PermissionsMiddleware()
+        next = Mock()
+        root = Mock()
+        info = Mock()
+        info.context.user.id = 1
+        pm.resolve(next, root, info)
+
+        assert 'permission11' in pm.permissions['group-1234']
+        assert 'permission12' in pm.permissions['group-1234']
+        assert 'permission23' in pm.permissions['group-2345']
+        # run twice and check permissions remain set
+        pm.resolve(next, root, info)
+        assert 'permission21' in pm.permissions['group-2345']
+        assert 'permission22' in pm.permissions['group-2345']
+        assert 'permission13' in pm.permissions['group-1234']
