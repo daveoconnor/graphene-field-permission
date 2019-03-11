@@ -26,9 +26,7 @@ class PermissionsMiddleware():
         self.permissions = {}
         try:
             src_mod, src_method = self.__import_settings()
-            print("src_mod %s, src_method %s" % (src_mod, src_method))
         except ImportError as exc1:
-            print('caught ImportError')
             error_msg = 'Failed to import any settings. Check your config.'
             raise Exception(error_msg) from exc1
         except AttributeError as exc2:
