@@ -1,20 +1,20 @@
 import setuptools
 from os import sys
+import pypandoc
 
 needs_pytest = {'pytest', 'test', 'ptr'}.intersection(sys.argv)
 pytest_runner = ['pytest-runner'] if needs_pytest else []
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+long_description = pypandoc.convert_file('README.md', 'rst')
+long_description = long_description.replace("\r", "")
 
 setuptools.setup(
     name="graphene-field-permission",
-    version="0.0.5",
+    version="0.0.6",
     author="Dave O'Connor",
     author_email="github@dead-pixels.org",
     description="A package to add field permission support for Graphene",
     long_description=long_description,
-    long_description_content_type="text/markdown",
     url="https://github.com/daveoconnor/graphene-field-permission",
     packages=setuptools.find_packages(),
     classifiers=[

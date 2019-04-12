@@ -1,23 +1,9 @@
 import pytest
 from graphene_field_permission.decorators import has_field_access
 from unittest.mock import Mock, MagicMock
-
-
-@pytest.fixture
-def group_permissions():
-    return {
-        'group-1234': {
-            'permission1': True,
-            'permission2': True,
-            'permission3': True,
-        },
-        'group-5678': {
-            'permission4': True,
-            'permission5': True,
-            'permission6': True,
-        }
-    }
-
+from graphene_field_permission import api
+from graphene_field_permission.tests.mocks import user_permission_group_mock
+import mocks
 
 @pytest.fixture(scope='module')
 def decorator1():
@@ -47,7 +33,7 @@ def decorator3():
 
 
 @pytest.fixture(autouse=True)
-def singleinfo():
+def single_info():
     info = MagicMock()
     info.context.user_permissions = {
         'permission1': True,
@@ -58,11 +44,15 @@ def singleinfo():
 
 
 @pytest.fixture(autouse=True)
-def groupinfo(group_permissions):
+def group_info():
     info = MagicMock()
-    info.context.user_permissions = group_permissions
+    info.context.user_permissions = user_permission_group_mock
     return info
 
+
+@pytest.fixture
+def test_data():
+    return mocks.orm_data_mock()
 
 class TestDecorators():
     def test___init__(self, decorator1, decorator2, decorator3):
@@ -75,130 +65,46 @@ class TestDecorators():
         assert 'permission5' in decorator3.req_perms
         assert decorator3.filter_field == 'division.corporation.id'
 
-    def test__permissions_filter(self, decorator1, decorator2, decorator3,
-                                 group_permissions):
+    def test___call__(self, single_info, group_info, test_data, monkeypatch):
+        def patch_field_access(*requirements, info_context, filter_field, filter_data):
+            return True
 
-        permissions = has_field_access._permissions_filter(
-            decorator1,
-            group_permissions,
-            'group-1234'
-        )
-        assert 'permission1' in permissions
-        assert 'permission2' in permissions
-        assert 'permission3' in permissions
-        assert 'permission4' not in permissions
-        assert 'permission5' not in permissions
-        assert 'permission6' not in permissions
+        def patch_field_access_fail(*requirements, info_context, filter_field, filter_data):
+            raise PermissionError
 
-        permissions2 = has_field_access._permissions_filter(
-            decorator1,
-            group_permissions,
-            'group-5678'
-        )
-        assert 'permission1' not in permissions2
-        assert 'permission2' not in permissions2
-        assert 'permission3' not in permissions2
-        assert 'permission4' in permissions2
-        assert 'permission5' in permissions2
-        assert 'permission6' in permissions2
-
-        # test that an exception is raised on incorrect key access
-        with pytest.raises(Exception):
-            has_field_access._permissions_filter(
-                decorator1,
-                group_permissions,
-                'group-NONE'
+        with monkeypatch.context() as m:
+            m.setattr(
+                api,
+                'check_field_access',
+                patch_field_access
             )
 
-    def test__get_filter_data(self, decorator1, decorator2, decorator3):
-        # test a single level
-        test_data = Mock()
-        test_data.id = 'foo'
-        assert has_field_access._get_filter_data(
-            decorator3,
-            test_data,
-            'id'
-        ) == 'foo'
+            # test working group
+            @has_field_access('permission4', filter_field='group.corporation.id')
+            def resolve_testfield(test_data, info):
+                assert test_data.name == 'foobar'
 
-        # test multiple levels
-        test_data = Mock()
-        test_data.group.division.corporation.id = 'foo'
-        assert has_field_access._get_filter_data(
-            decorator3,
-            test_data,
-            'group.division.corporation.id'
-        ) == 'foo'
-        # test missing relation works
-        with pytest.raises(Exception):
-            # test multiple levels
-            has_field_access._get_filter_data(
-                decorator3,
-                {},
-                'two.steps.beyond'
+            resolve_testfield(test_data, group_info)
+
+        with monkeypatch.context() as m:
+            monkeypatch.setattr(
+                api,
+                'check_field_access',
+                patch_field_access_fail
             )
 
-    def test__has_access(self, decorator1, decorator2, decorator3,
-                         group_permissions):
-        assert decorator1._has_access({'permission1': True}) is True
-        # test that it's OR
-        assert decorator1._has_access({
-            'permission1': True, 'permX': True
-        }) is True
-        # test that order doesn't matter
-        assert decorator1._has_access({
-            'permX': True, 'permission1': True
-        }) is True
-        with pytest.raises(KeyError):
-            decorator1._has_access({'permX': True})
+            # test one to failing
+            @has_field_access('permissionX')
+            def resolve_testfield(test_data, info):
+                pass
 
-        assert decorator2._has_access(
-            group_permissions,
-            'group-1234'
-        ) is True
-        # test for false positive
-        with pytest.raises(KeyError):
-            decorator2._has_access(
-                group_permissions,
-                'group-5678'
-            )
+            with pytest.raises(Exception):
+                resolve_testfield({}, single_info)
 
-        assert decorator3._has_access(
-            group_permissions,
-            'group-5678'
-        ) is True
-        # test for false positive
-        with pytest.raises(KeyError):
-            decorator3._has_access(
-                group_permissions,
-                'group-1234'
-            )
+            # test failing group
+            @has_field_access('permission3', filter_field='group.corporation.id')
+            def resolve_testfield(test_data, info):
+                assert test_data.name == 'foobar'
 
-    def test___call__(self, singleinfo, groupinfo):
-        # test working group
-        @has_field_access('permission4', filter_field='group.corporation.id')
-        def resolve_testfield(test_data, info):
-            assert test_data.name == 'foobar'
-
-        test_data = Mock()
-        test_data.name = 'foobar'
-        test_data.group.corporation.id = 'group-5678'
-        resolve_testfield(test_data, groupinfo)
-
-        # test one to failing
-        @has_field_access('permissionX')
-        def resolve_testfield(test_data, info):
-            pass
-
-        with pytest.raises(Exception):
-            resolve_testfield({}, singleinfo)
-
-        # test failing group
-        @has_field_access('permission3', filter_field='group.corporation.id')
-        def resolve_testfield(test_data, info):
-            assert test_data.name == 'foobar'
-
-        with pytest.raises(Exception):
-            test_data = Mock()
-            test_data.name = 'foobar'
-            test_data.group.corporation.id = 'group-5678'
-            resolve_testfield(test_data, groupinfo)
+            with pytest.raises(Exception):
+                resolve_testfield(test_data, group_info)
