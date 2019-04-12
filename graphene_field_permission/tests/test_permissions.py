@@ -29,7 +29,7 @@ def django_valid_conf_mock():
     return mocks.django_valid_conf_mock()
 
 
-class TestPermissionsMiddleware():
+class TestPermissionsMiddleware:
     def test_on_error(self, logger, django_mock):
         sys.modules['django.conf'] = django_mock
         import graphene_field_permission.permissions

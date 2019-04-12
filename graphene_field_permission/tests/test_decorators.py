@@ -54,7 +54,8 @@ def group_info():
 def test_data():
     return mocks.orm_data_mock()
 
-class TestDecorators():
+
+class TestDecorators:
     def test___init__(self, decorator1, decorator2, decorator3):
         assert 'permission1' in decorator1.req_perms
         assert decorator1.filter_field is None

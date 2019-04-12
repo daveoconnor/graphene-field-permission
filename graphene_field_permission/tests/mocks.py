@@ -58,6 +58,7 @@ def user_permission_group_mock(user=None):
 def logger_mock():
     return logging.getLogger('graphene_field_permission.permissions')
 
+
 def orm_data_mock():
     test_data = Mock()
     test_data.name = 'foobar'

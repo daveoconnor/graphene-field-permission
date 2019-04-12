@@ -4,7 +4,7 @@ from . import api
 logger = logging.getLogger(__name__)
 
 
-class has_field_access():
+class has_field_access:
     def __init__(self, *req_perms, filter_field=None):
         self.filter_field = filter_field
         self.req_perms = req_perms
