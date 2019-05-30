@@ -10,7 +10,7 @@ long_description = long_description.replace("\r", "")
 
 setuptools.setup(
     name="graphene-field-permission",
-    version="0.0.6",
+    version="0.0.7",
     author="Dave O'Connor",
     author_email="github@dead-pixels.org",
     description="A package to add field permission support for Graphene",
