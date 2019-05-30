@@ -76,7 +76,8 @@ def fetch_permissions(user):
     return permissions
 
 
-def check_field_access(*required_permissions, filter_field=None, filter_data=None, info_context):
+def check_field_access(*required_permissions, filter_field=None,
+                       filter_data=None, info_context):
     """
     Confirms user has access to a permission
     :param required_permissions: multiple arguments, one of which is required
@@ -89,12 +90,18 @@ def check_field_access(*required_permissions, filter_field=None, filter_data=Non
     filter_id = None
     if filter_field is not None:
         if filter_data is None:
-            raise AttributeError('filter_data has no data. Must be set when filter_field is set')
+            error_msg = 'filter_data empty. Must be set if filter_field is set'
+            raise AttributeError(error_msg)
         filter_id = get_filter_data(filter_data, filter_field)
 
-    user_permissions = fetch_permissions(
-        info_context.user
-    )
+    # caching
+    if hasattr(info_context, 'permissions'):
+        user_permissions = info_context.permissions
+    else:
+        user_permissions = fetch_permissions(
+            info_context.user
+        )
+        info_context.permissions = user_permissions
 
     return _has_access(
         *required_permissions,
