@@ -139,18 +139,12 @@ class TestApi:
             assert 'foo' not in permissions['test2'].keys()
             assert 'x' not in permissions['test1'].keys()
 
-    def test_check_field_access(self, monkeypatch):
+    def test_check_field_access_single(self, monkeypatch):
         def mock_single_permissions_method():
             return Mock(return_value=user_permission_single_mock())
 
-        def mock_group_permissions_method():
-            return Mock(return_value=user_permission_group_mock())
-
         info_context = Mock(spec=[])
         info_context.user = Mock()
-
-        test_data = Mock()
-        test_data.group.division.corporation.id = 'group-5678'
 
         # single level of permissions
         with monkeypatch.context() as m:
@@ -170,6 +164,16 @@ class TestApi:
                     'fail',
                     info_context=info_context
                 )
+
+    def test_check_field_access_group(self, monkeypatch):
+        def mock_group_permissions_method():
+            return Mock(return_value=user_permission_group_mock())
+
+        info_context = Mock(spec=[])
+        info_context.user = Mock()
+
+        test_data = Mock()
+        test_data.group.division.corporation.id = 'group-5678'
 
         with monkeypatch.context() as m:
             m.setattr(
