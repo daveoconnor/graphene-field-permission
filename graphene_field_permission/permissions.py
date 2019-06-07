@@ -11,6 +11,8 @@ class PermissionsMiddleware():
     def resolve(self, next, root, info, **kwargs):
         # have to check 'id' because AnonymousUser is
         # considered authed for some reason
+        # TODO: run some benchmarks on this to see if better to
+        # have it be try/except based
         if info.context.user.id:
             if not hasattr(self, 'permissions'):
                 self.permissions = api.fetch_permissions(

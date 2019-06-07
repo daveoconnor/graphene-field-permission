@@ -23,10 +23,11 @@ def get_filter_data(data, filter_field):
     # traverse the related data
     while len(filter_list):
         related = filter_list.pop(0)
-        if not hasattr(data, related):
+        try:
+            data = getattr(data, related)
+        except AttributeError:
             error_msg = "{} not found on {}. Modify the filter_field."
             raise Exception(error_msg.format(related, type(data), data))
-        data = getattr(data, related)
 
     return str(data)
 
@@ -95,6 +96,8 @@ def check_field_access(*required_permissions, filter_field=None,
         filter_id = get_filter_data(filter_data, filter_field)
 
     # caching
+    # TODO: run some benchmarks on this to see if better to
+    # have it be try/except based
     if hasattr(info_context, 'permissions'):
         user_permissions = info_context.permissions
     else:
