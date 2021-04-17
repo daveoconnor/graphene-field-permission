@@ -6,3 +6,4 @@ build/
 dist/
 graphene_field_permission.egg-info/
 .idea
+venv/
