@@ -1,10 +1,16 @@
 import pytest
 import graphene_field_permission.permissions_loader
-from graphene_field_permission.api import _has_access, permissions_filter,\
-                                          get_filter_data, check_field_access,\
-                                          restructure_permissions, fetch_permissions
-from graphene_field_permission.tests.mocks import user_permission_group_mock, user_permission_single_mock
 from unittest.mock import Mock
+from graphene_field_permission.api import (
+    _has_access, permissions_filter,
+    get_filter_data, check_field_access,
+    restructure_permissions,
+    fetch_permissions,
+)
+from graphene_field_permission.tests.mocks import (
+    user_permission_group_mock,
+    user_permission_single_mock,
+)
 
 
 class TestApi:
@@ -79,6 +85,7 @@ class TestApi:
             user_permissions=user_permission_group_mock(),
             filter_id='group-5678'
         ) is True
+
         with pytest.raises(PermissionError):
             _has_access(
                 'permission2',

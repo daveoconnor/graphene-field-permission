@@ -4,29 +4,16 @@ import sys
 from unittest import mock
 from unittest.mock import Mock
 
-import mocks
-from graphene_field_permission.tests.mocks import user_permission_group_mock,\
-    user_permission_single_mock
-
-
-@pytest.fixture
-def logger():
-    return mocks.logger_mock()
-
-
-@pytest.fixture
-def user():
-    return Mock()
-
-
-@pytest.fixture
-def django_mock():
-    return mocks.django_empty_conf_mock()
-
-
-@pytest.fixture
-def django_valid_conf_mock():
-    return mocks.django_valid_conf_mock()
+from .mocks import (
+    user_permission_group_mock,
+    user_permission_single_mock,
+    django_valid_conf_mock,
+)
+from .fixtures import (
+    logger,
+    user,
+    django_mock,
+)
 
 
 class TestPermissionsMiddleware:
@@ -39,13 +26,13 @@ class TestPermissionsMiddleware:
             pm.on_error('this is an error')
             mock_error.assert_called_once_with('this is an error')
 
-    def test_resolve(self, django_valid_conf_mock):
+    def test_resolve(self):
         next = Mock()
         root = Mock()
         info = Mock()
         info.context.user.id = 1
-        del sys.modules['django.conf']
-        sys.modules['django.conf'] = django_valid_conf_mock
+        # del sys.modules['django.conf']
+        sys.modules['django.conf'] = django_valid_conf_mock()
 
         # test ungrouped user
         fakemod = Mock(spec=[])

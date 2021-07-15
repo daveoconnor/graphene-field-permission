@@ -1,58 +1,16 @@
 import pytest
-from graphene_field_permission.decorators import has_field_access
-from unittest.mock import Mock, MagicMock
 from graphene_field_permission import api
-from graphene_field_permission.tests.mocks import user_permission_group_mock
-import mocks
+from graphene_field_permission.decorators import has_field_access
+from .mocks import user_permission_group_mock
 
-@pytest.fixture(scope='module')
-def decorator1():
-    # simple permission check
-    yield has_field_access(
-        'permission1'
-    )
-
-
-@pytest.fixture(scope='module')
-def decorator2():
-    # filter group by data object field
-    yield has_field_access(
-        'permission2',
-        'permission3',
-        filter_field='id',
-    )
-
-
-@pytest.fixture(scope='module')
-def decorator3():
-    yield has_field_access(
-        'permission4',
-        'permission5',
-        filter_field='division.corporation.id',
-    )
-
-
-@pytest.fixture(autouse=True)
-def single_info():
-    info = MagicMock()
-    info.context.user_permissions = {
-        'permission1': True,
-        'permission2': True,
-        'permission3': True,
-    }
-    return info
-
-
-@pytest.fixture(autouse=True)
-def group_info():
-    info = MagicMock()
-    info.context.user_permissions = user_permission_group_mock
-    return info
-
-
-@pytest.fixture
-def test_data():
-    return mocks.orm_data_mock()
+from .fixtures import (
+    decorator1,
+    decorator2,
+    decorator3,
+    single_info,
+    group_info,
+    test_data,
+)
 
 
 class TestDecorators:

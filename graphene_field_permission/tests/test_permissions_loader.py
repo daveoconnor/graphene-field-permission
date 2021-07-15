@@ -2,21 +2,18 @@ import pytest
 import sys
 from unittest.mock import Mock
 
-from mocks import django_empty_conf_mock, django_missing_src_module_conf_mock,\
-    django_missing_src_method_conf_mock, django_valid_conf_mock,\
-    user_permission_single_mock, logger_mock
-from graphene_field_permission.permissions_loader import\
-    import_django_settings, import_settings, get_permissions_method
-
-
-@pytest.fixture
-def logger():
-    return logger_mock()
-
-
-@pytest.fixture
-def user():
-    return Mock()
+from .mocks import (
+    django_empty_conf_mock,
+    django_valid_conf_mock,
+    django_missing_src_module_conf_mock,
+    django_missing_src_method_conf_mock,
+    user_permission_single_mock,
+)
+from graphene_field_permission.permissions_loader import (
+    import_django_settings,
+    import_settings,
+    get_permissions_method
+)
 
 
 class TestPermissionsLoader:
