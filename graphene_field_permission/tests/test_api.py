@@ -10,7 +10,9 @@ from graphene_field_permission.api import (
 from graphene_field_permission.tests.fixtures import (
     group_permissions,
     single_permissions,
-    info_mock, user_permission_group_mock, user_permission_single_mock,
+    info_mock,
+    user_permission_group_mock,
+    user_permission_single_mock,
 )
 
 
@@ -18,7 +20,6 @@ class TestApi:
     def test_permissions_filter(
             self,
             user_permission_group_mock,
-            user_permission_single_mock
     ):
         permissions = permissions_filter(
             user_permission_group_mock,
@@ -102,16 +103,12 @@ class TestApi:
             user_permission_single_mock,
             user_permission_group_mock
     ):
-        results = restructure_permissions(
-            user_permission_single_mock
-        )
+        results = restructure_permissions(user_permission_single_mock)
         assert results['permission1'] is True
         assert results['permission2'] is True
         assert results['permission3'] is True
 
-        results = restructure_permissions(
-            user_permission_group_mock
-        )
+        results = restructure_permissions(user_permission_group_mock)
         assert results['group-1234']['permission1'] is True
         assert results['group-1234']['permission3'] is True
         assert results['group-5678']['permission5'] is True

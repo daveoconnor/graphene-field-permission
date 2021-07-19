@@ -6,7 +6,7 @@ from .fixtures import (
     single_info,
     group_info,
     orm_data_mock,
-    user_permission_group_mock,
+)
 
 
 @pytest.fixture
