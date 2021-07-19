@@ -111,7 +111,7 @@ class ModifyGroup(graphene.Mutation):
 
 More than one ```check_field_access()``` call can be made and retrieved permissions will be retained between the calls.
 
-## Sample Result in GraphQL output from query decorator:
+### Sample Result in GraphQL output from query decorator:
 
 ```javascript
 {
@@ -209,6 +209,31 @@ GRAPHENE = {
         'graphene_field_permission.permissions.PermissionsMiddleware'
     ]
 }
+```
+
+## Unit testing against schemas using Graphene Field Permission
+
+To have pytest override checks in schema unit tests you can use the ```graphene_field_permissions_allowed``` fixture to have ```check_field_access``` and ```has_field_access``` resolve as if the user has permissions.
+
+```python
+import pytest
+import schema from your_app.schema
+from graphene_field_permission.fixtures import graphene_field_permissions_allowed
+
+
+class TestSample:
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        self.client = Client(schema=your_schema)
+        # ... insert models setup here ...
+
+    def test_query(self, graphene_field_permissions_allowed):
+        your_query = """
+        ... insert your query here ...
+        """
+        your_response = self.client.execute(your_query, variables={})
+        assert set_status_response == None # modify None to match your expected data
+
 ```
 
 ## Future updates, design notes
