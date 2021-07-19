@@ -4,21 +4,18 @@ import sys
 from unittest import mock
 from unittest.mock import Mock
 
-from .mocks import (
-    user_permission_group_mock,
-    user_permission_single_mock,
-    django_valid_conf_mock,
-)
 from .fixtures import (
+    django_empty_conf,
+    django_valid_conf,
     logger,
-    user,
-    django_mock,
+    single_permission_data,
+    group_permission_data,
 )
 
 
 class TestPermissionsMiddleware:
-    def test_on_error(self, logger, django_mock):
-        sys.modules['django.conf'] = django_mock
+    def test_on_error(self, logger):
+        sys.modules['django.conf'] = django_empty_conf
         import graphene_field_permission.permissions
         importlib.reload(graphene_field_permission.permissions)
         with mock.patch.object(logger, 'error') as mock_error:
@@ -26,17 +23,17 @@ class TestPermissionsMiddleware:
             pm.on_error('this is an error')
             mock_error.assert_called_once_with('this is an error')
 
-    def test_resolve(self):
+    def test_resolve(self, django_valid_conf):
         next = Mock()
         root = Mock()
         info = Mock()
         info.context.user.id = 1
         # del sys.modules['django.conf']
-        sys.modules['django.conf'] = django_valid_conf_mock()
+        sys.modules['django.conf'] = django_valid_conf
 
         # test ungrouped user
         fakemod = Mock(spec=[])
-        fakemod.fakemethod = user_permission_single_mock
+        fakemod.fakemethod = Mock(return_value=single_permission_data)
         sys.modules['fakemod'] = fakemod
 
         import graphene_field_permission.permissions
@@ -55,7 +52,7 @@ class TestPermissionsMiddleware:
 
         # test grouped user
         fakemod = Mock(spec=[])
-        fakemod.fakemethod = user_permission_group_mock
+        fakemod.fakemethod = Mock(return_value=group_permission_data)
         sys.modules['fakemod'] = fakemod
 
         import graphene_field_permission.permissions

@@ -1,7 +1,6 @@
 import pytest
 from graphene_field_permission import api
 from graphene_field_permission.decorators import has_field_access
-from .mocks import user_permission_group_mock
 
 from .fixtures import (
     decorator1,
@@ -9,7 +8,8 @@ from .fixtures import (
     decorator3,
     single_info,
     group_info,
-    test_data,
+    orm_data_mock,
+    user_permission_group_mock,
 )
 
 
@@ -24,7 +24,7 @@ class TestDecorators:
         assert 'permission5' in decorator3.req_perms
         assert decorator3.filter_field == 'division.corporation.id'
 
-    def test___call__(self, single_info, group_info, test_data, monkeypatch):
+    def test___call__(self, single_info, group_info, orm_data_mock, monkeypatch):
         def patch_field_access(*requirements, info_context, filter_field, filter_data):
             return True
 
@@ -43,7 +43,7 @@ class TestDecorators:
             def resolve_testfield(test_data, info):
                 assert test_data.name == 'foobar'
 
-            resolve_testfield(test_data, group_info)
+            resolve_testfield(orm_data_mock, group_info)
 
         with monkeypatch.context() as m:
             monkeypatch.setattr(
@@ -66,4 +66,4 @@ class TestDecorators:
                 assert test_data.name == 'foobar'
 
             with pytest.raises(Exception):
-                resolve_testfield(test_data, group_info)
+                resolve_testfield(orm_data_mock, group_info)
