@@ -9,7 +9,7 @@ with open('README.md') as readme:
 
 setuptools.setup(
     name="graphene-field-permission",
-    version="0.0.9",
+    version="1.0.0",
     author="Dave O'Connor",
     author_email="github@dead-pixels.org",
     description="A package to add field permission support for Graphene",
@@ -23,7 +23,6 @@ setuptools.setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
