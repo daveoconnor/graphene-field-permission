@@ -3,14 +3,37 @@ from graphene_field_permission import api
 from graphene_field_permission.decorators import has_field_access
 
 from .fixtures import (
-    decorator1,
-    decorator2,
-    decorator3,
     single_info,
     group_info,
     orm_data_mock,
     user_permission_group_mock,
-)
+
+
+@pytest.fixture
+def decorator1():
+    # simple permission check
+    yield has_field_access(
+        'permission1'
+    )
+
+
+@pytest.fixture
+def decorator2():
+    # filter group by data object field
+    yield has_field_access(
+        'permission2',
+        'permission3',
+        filter_field='id',
+    )
+
+
+@pytest.fixture
+def decorator3():
+    yield has_field_access(
+        'permission4',
+        'permission5',
+        filter_field='division.corporation.id',
+    )
 
 
 class TestDecorators:

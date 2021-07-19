@@ -1,37 +1,6 @@
 import logging
 import pytest
 from unittest.mock import MagicMock, Mock
-from graphene_field_permission.decorators import has_field_access
-import graphene_field_permission
-
-
-@pytest.fixture(scope='module')
-def decorator1():
-    # simple permission check
-    yield has_field_access(
-        'permission1'
-    )
-
-
-@pytest.fixture(scope='module')
-def decorator2():
-    # filter group by data object field
-    yield has_field_access(
-        'permission2',
-        'permission3',
-        filter_field='id',
-    )
-
-
-@pytest.fixture(scope='module')
-def decorator3():
-    yield has_field_access(
-        'permission4',
-        'permission5',
-        filter_field='division.corporation.id',
-    )
-
-
 @pytest.fixture
 def single_info():
     info = MagicMock()
