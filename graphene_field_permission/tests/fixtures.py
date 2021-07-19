@@ -41,9 +41,17 @@ def group_info():
 
 
 @pytest.fixture
+def info_context_mock():
+    context = Mock(spec=[])
+    context.user = Mock()
+    return context
+
+
+@pytest.fixture
 def info_mock():
     info = Mock(spec=[])
-    info.user = Mock()
+    info.context = Mock(spec=[])
+    info.context.user = Mock()
     return info
 
 

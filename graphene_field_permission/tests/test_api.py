@@ -10,7 +10,7 @@ from graphene_field_permission.api import (
 from graphene_field_permission.tests.fixtures import (
     group_permissions,
     single_permissions,
-    info_mock,
+    info_context_mock,
     user_permission_group_mock,
     user_permission_single_mock,
     structured_group_permission_data,
@@ -155,27 +155,29 @@ class TestApi:
             assert 'x' not in permissions['test1'].keys()
 
 
-    def test_check_field_access_single(self, single_permissions, info_mock):
-        # info_context = Mock(spec=[])
-        # info_context.user = Mock()
-
+    def test_check_field_access_single(
+            self,
+            single_permissions,
+            info_context_mock
+    ):
         # single level of permissions
         assert check_field_access(
             'permission1',
-            info_context=info_mock
+            info_context=info_context_mock
         ) is True
 
         # no matching permission
         with pytest.raises(PermissionError):
             check_field_access(
                 'fail',
-                info_context=info_mock
+                info_context=info_context_mock
             )
 
-    def test_check_field_access_group(self, group_permissions, info_mock):
-        # info_context = Mock(spec=[])
-        # info_context.user = Mock()
-
+    def test_check_field_access_group(
+            self,
+            group_permissions,
+            info_context_mock
+    ):
         test_data = Mock()
         test_data.group.division.corporation.id = 'group-5678'
 
@@ -184,7 +186,7 @@ class TestApi:
             'permission4',
             filter_field='group.division.corporation.id',
             filter_data=test_data,
-            info_context=info_mock,
+            info_context=info_context_mock,
         ) is True
 
         # ensure filter_data check works
@@ -193,5 +195,5 @@ class TestApi:
                 'permissionXX',
                 'permission4',
                 filter_field='group.division.corporation.id',
-                info_context=info_mock,
+                info_context=info_context_mock,
             )
