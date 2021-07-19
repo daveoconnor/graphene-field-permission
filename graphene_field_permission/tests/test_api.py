@@ -13,6 +13,8 @@ from graphene_field_permission.tests.fixtures import (
     info_mock,
     user_permission_group_mock,
     user_permission_single_mock,
+    structured_group_permission_data,
+    structured_single_permission_data,
 )
 
 
@@ -81,14 +83,14 @@ class TestApi:
         ) is True
         assert _has_access(
             'permission1',
-            user_permissions=user_permission_group_mock,
+            user_permissions=structured_group_permission_data,
             filter_id='group-1234'
         ) is True
         # test to ensure OR functionality
         assert _has_access(
             'permission1',
             'permission5',
-            user_permissions=user_permission_group_mock,
+            user_permissions=structured_group_permission_data,
             filter_id='group-5678'
         ) is True
 
@@ -153,26 +155,26 @@ class TestApi:
             assert 'x' not in permissions['test1'].keys()
 
 
-    def test_check_field_access_single(self, single_permissions):
-        info_context = Mock(spec=[])
-        info_context.user = Mock()
+    def test_check_field_access_single(self, single_permissions, info_mock):
+        # info_context = Mock(spec=[])
+        # info_context.user = Mock()
 
         # single level of permissions
         assert check_field_access(
             'permission1',
-            info_context=info_context
+            info_context=info_mock
         ) is True
 
         # no matching permission
         with pytest.raises(PermissionError):
             check_field_access(
                 'fail',
-                info_context=info_context
+                info_context=info_mock
             )
 
     def test_check_field_access_group(self, group_permissions, info_mock):
-        info_context = Mock(spec=[])
-        info_context.user = Mock()
+        # info_context = Mock(spec=[])
+        # info_context.user = Mock()
 
         test_data = Mock()
         test_data.group.division.corporation.id = 'group-5678'

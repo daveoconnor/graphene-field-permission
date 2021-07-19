@@ -1,28 +1,49 @@
 import logging
 import pytest
 from unittest.mock import MagicMock, Mock
-@pytest.fixture
-def single_info():
-    info = MagicMock()
-    info.context.user_permissions = {
+import graphene_field_permission
+
+single_permission_data = ['permission1', 'permission2', 'permission3']
+group_permission_data = {
+    'group-1234': ['permission1', 'permission2', 'permission3'],
+    'group-5678': ['permission4', 'permission5', 'permission6'],
+}
+structured_single_permission_data = {
+    'permission1': True,
+    'permission2': True,
+    'permission3': True,
+}
+structured_group_permission_data = {
+    'group-1234': {
         'permission1': True,
         'permission2': True,
         'permission3': True,
+    },
+    'group-5678': {
+        'permission4': True,
+        'permission5': True,
+        'permission6': True,
     }
+}
+
+@pytest.fixture
+def single_info():
+    info = MagicMock()
+    info.context.user_permissions = structured_single_permission_data
     return info
 
 
 @pytest.fixture
 def group_info():
     info = MagicMock()
-    info.context.user_permissions = user_permission_group_mock
+    info.context.user_permissions = structured_group_permission_data
     return info
 
 
 @pytest.fixture
-def single_info():
-    info = MagicMock()
-    info.context.user_permissions = user_permission_single_mock
+def info_mock():
+    info = Mock(spec=[])
+    info.user = Mock()
     return info
 
 
@@ -32,19 +53,11 @@ def logger():
 
 
 @pytest.fixture
-def user():
-    return Mock()
-
-
-@pytest.fixture
 def fetch_permissions_single_permissions(monkeypatch):
-    def fetch_permissions(*args, **kwargs):
-        return {'permission1': True, 'permission2': True, 'permission3': True}
-
     monkeypatch.setattr(
         graphene_field_permission.api,
         "fetch_permissions",
-        fetch_permissions,
+        Mock(return_value=structured_single_permission_data),
     )
 
 
@@ -85,33 +98,11 @@ def django_valid_conf():
 
 
 @pytest.fixture
-def info_mock():
-    info = Mock(spec=[])
-    info.user = Mock()
-    return info
-
-
-@pytest.fixture
 def orm_data_mock():
     test_data = Mock()
     test_data.name = 'foobar'
     test_data.group.corporation.id = 'group-5678'
     return test_data
-
-
-single_permission_data = ['permission1', 'permission2', 'permission3']
-group_permission_data = {
-    'group-1234': {
-        'permission1': True,
-        'permission2': True,
-        'permission3': True,
-    },
-    'group-5678': {
-        'permission4': True,
-        'permission5': True,
-        'permission6': True,
-    }
-}
 
 
 @pytest.fixture
