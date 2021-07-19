@@ -1,8 +1,10 @@
 *.pyc
 .cache
 .coverage
+.eggs
 __pycache__/
 build/
 dist/
 graphene_field_permission.egg-info/
 .idea
+v/*

@@ -1,11 +1,15 @@
 import pytest
-from graphene_field_permission.decorators import has_field_access
-from unittest.mock import Mock, MagicMock
 from graphene_field_permission import api
-from graphene_field_permission.tests.mocks import user_permission_group_mock
-import mocks
+from graphene_field_permission.decorators import has_field_access
 
-@pytest.fixture(scope='module')
+from .fixtures import (
+    single_info,
+    group_info,
+    orm_data_mock,
+)
+
+
+@pytest.fixture
 def decorator1():
     # simple permission check
     yield has_field_access(
@@ -13,7 +17,7 @@ def decorator1():
     )
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture
 def decorator2():
     # filter group by data object field
     yield has_field_access(
@@ -23,36 +27,13 @@ def decorator2():
     )
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture
 def decorator3():
     yield has_field_access(
         'permission4',
         'permission5',
         filter_field='division.corporation.id',
     )
-
-
-@pytest.fixture(autouse=True)
-def single_info():
-    info = MagicMock()
-    info.context.user_permissions = {
-        'permission1': True,
-        'permission2': True,
-        'permission3': True,
-    }
-    return info
-
-
-@pytest.fixture(autouse=True)
-def group_info():
-    info = MagicMock()
-    info.context.user_permissions = user_permission_group_mock
-    return info
-
-
-@pytest.fixture
-def test_data():
-    return mocks.orm_data_mock()
 
 
 class TestDecorators:
@@ -66,7 +47,7 @@ class TestDecorators:
         assert 'permission5' in decorator3.req_perms
         assert decorator3.filter_field == 'division.corporation.id'
 
-    def test___call__(self, single_info, group_info, test_data, monkeypatch):
+    def test___call__(self, single_info, group_info, orm_data_mock, monkeypatch):
         def patch_field_access(*requirements, info_context, filter_field, filter_data):
             return True
 
@@ -85,7 +66,7 @@ class TestDecorators:
             def resolve_testfield(test_data, info):
                 assert test_data.name == 'foobar'
 
-            resolve_testfield(test_data, group_info)
+            resolve_testfield(orm_data_mock, group_info)
 
         with monkeypatch.context() as m:
             monkeypatch.setattr(
@@ -108,4 +89,4 @@ class TestDecorators:
                 assert test_data.name == 'foobar'
 
             with pytest.raises(Exception):
-                resolve_testfield(test_data, group_info)
+                resolve_testfield(orm_data_mock, group_info)
