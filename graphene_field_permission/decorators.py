@@ -1,4 +1,5 @@
 import logging
+from functools import wraps
 from . import api
 
 logger = logging.getLogger(__name__)
@@ -10,6 +11,7 @@ class has_field_access:
         self.req_perms = req_perms
 
     def __call__(self, func, *args, **kwargs):
+        @wraps(func)
         def check(data, info, *args, **kwargs):
             try:
                 api.check_field_access(
