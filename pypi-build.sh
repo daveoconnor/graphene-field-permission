@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSIONS="3.6 3.7 3.8 3.9"
+VERSIONS="3.7 3.8 3.9 3.10"
 for VERSION in $VERSIONS
 	do
 		python3 -m virtualenv --python=python$VERSION v/venv$VERSION
@@ -15,5 +15,3 @@ for VERSION in $VERSIONS
 done
 python3.8 -m pip install twine wheel
 python3.8 setup.py sdist bdist_wheel
-python3.8 -m twine upload -u __token__ -p $TEST_TOKEN --non-interactive --repository testpypi dist/*
-python3.8 -m twine upload -u __token__ -p $LIVE_TOKEN --non-interactive dist/*
